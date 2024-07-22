@@ -1,4 +1,4 @@
-package com.github.mukhlisov.dto;
+package com.github.mukhlisov.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

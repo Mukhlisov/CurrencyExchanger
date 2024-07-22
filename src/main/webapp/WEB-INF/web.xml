@@ -11,7 +11,11 @@
     
     <servlet-mapping>
         <servlet-name>CurrenciesServlet</servlet-name>
-        <url-pattern>/currencies</url-pattern>
+        <url-pattern>/currencies/*</url-pattern>
     </servlet-mapping>
 
+
+    <listener>
+        <listener-class>com.github.mukhlisov.init.DataBaseInitializer</listener-class>
+    </listener>
 </web-app>
