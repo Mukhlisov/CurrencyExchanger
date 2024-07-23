@@ -1,4 +1,4 @@
-package com.github.mukhlisov.model;
+package com.github.mukhlisov.model.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCurrency {
+public class CreateCurrencyDto {
     private String code;
     private String fullName;
     private String sign;

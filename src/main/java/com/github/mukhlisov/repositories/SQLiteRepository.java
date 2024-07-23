@@ -50,7 +50,7 @@ public abstract class SQLiteRepository<K, E> implements AutoCloseable {
     }
 
     public void insert(E entity) throws SQLException{
-        String sql = String.format("INSERT INTO %s (%s) VALUES %s", table, getColumns(), getPlaceHolders());
+        String sql = String.format("INSERT INTO %s %s VALUES %s", table, getColumns(), getPlaceHolders());
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         setInsertValues(preparedStatement, entity);
         preparedStatement.executeUpdate();

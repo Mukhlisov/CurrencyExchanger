@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mukhlisov.exceptions.CurrencyNotFoundException;
 import com.github.mukhlisov.exceptions.EmptyCurrencyException;
 import com.github.mukhlisov.exceptions.DataBaseOperationException;
-import com.github.mukhlisov.model.CreateCurrency;
+import com.github.mukhlisov.model.dto.CreateCurrencyDto;
 import com.github.mukhlisov.service.CurrenciesService;
 import com.github.mukhlisov.utils.RequestParser;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,9 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.Scanner;
 
 @WebServlet(urlPatterns = "/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
@@ -64,18 +61,18 @@ public class CurrenciesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try{
             String json = RequestParser.getJSONData(req.getInputStream());
 
-            CreateCurrency createCurrency = objectMapper.readValue(json, CreateCurrency.class);
-            currenciesService.saveCurrency(createCurrency);
+            CreateCurrencyDto createCurrencyDto = objectMapper.readValue(json, CreateCurrencyDto.class);
+            currenciesService.saveCurrency(createCurrencyDto);
 
             resp.setStatus(HttpServletResponse.SC_CREATED);
-        } catch (DataBaseOperationException e){
+        } catch (DataBaseOperationException | IOException e){
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (IOException e){
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
+
+
 }
