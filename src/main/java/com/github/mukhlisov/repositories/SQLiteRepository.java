@@ -1,6 +1,5 @@
 package com.github.mukhlisov.repositories;
 
-import com.github.mukhlisov.utils.CurrencyExchangeConnector;
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
 
 import java.sql.Connection;
@@ -15,13 +14,14 @@ import java.util.Optional;
 
 public abstract class SQLiteRepository<K, E> implements AutoCloseable {
 
+    private static final String URL = "jdbc:sqlite:currency_exchange.db";
     protected Connection connection;
     protected String table;
 
     public SQLiteRepository(String table) throws CouldNotConnectDataBaseException{
         try{
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(CurrencyExchangeConnector.URL);
+            connection = DriverManager.getConnection(URL);
             this.table = table;
         }catch (ClassNotFoundException | SQLException e){
             throw new CouldNotConnectDataBaseException(e.getMessage(), e);

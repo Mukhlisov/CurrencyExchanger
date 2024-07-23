@@ -3,30 +3,32 @@ package com.github.mukhlisov.servlets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
 import com.github.mukhlisov.exceptions.CurrencyNotFoundException;
 import com.github.mukhlisov.exceptions.EmptyCurrencyException;
-import com.github.mukhlisov.exceptions.FailedToCloseConnectionException;
-import com.github.mukhlisov.model.Currency;
-import com.github.mukhlisov.repositories.CurrenciesRepository;
+import com.github.mukhlisov.exceptions.DataBaseOperationException;
+import com.github.mukhlisov.model.CreateCurrency;
 import com.github.mukhlisov.service.CurrenciesService;
-import com.github.mukhlisov.utils.CurrencyExchangeConnector;
 import com.github.mukhlisov.utils.RequestParser;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.Scanner;
 
+@WebServlet(urlPatterns = "/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
 
-    public CurrenciesService service;
+    private final CurrenciesService currenciesService;
+    private final ObjectMapper objectMapper;
 
     public CurrenciesServlet(){
-        service = new CurrenciesService();
+        currenciesService = new CurrenciesService();
+        objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -35,16 +37,15 @@ public class CurrenciesServlet extends HttpServlet {
         String json = "{\"message\":\"Валюта не найдена\"}";
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String code = RequestParser.getCodeFromRequestUri(req.getRequestURI());
 
             if (code == null){
-                json = mapper.writeValueAsString(service.getAllCurrencies());
+                json = objectMapper.writeValueAsString(currenciesService.getAllCurrencies());
             } else{
-                json = mapper.writeValueAsString(service.getCurrencyByCode(code));
+                json = objectMapper.writeValueAsString(currenciesService.getCurrencyByCode(code));
             }
 
-        } catch (FailedToCloseConnectionException | CouldNotConnectDataBaseException | JsonProcessingException e){
+        } catch (DataBaseOperationException | JsonProcessingException e){
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (EmptyCurrencyException e){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -63,22 +64,18 @@ public class CurrenciesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        /*try{
-            Scanner scanner = new Scanner(req.getInputStream(), StandardCharsets.UTF_8);
-            String jsonE = scanner.useDelimiter("\\A").next();
-            scanner.close();
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        try{
+            String json = RequestParser.getJSONData(req.getInputStream());
 
-            ObjectMapper mapper = new ObjectMapper();
-            CreateCurrency createCurrency = mapper.readValue(jsonE, CreateCurrency.class);
+            CreateCurrency createCurrency = objectMapper.readValue(json, CreateCurrency.class);
+            currenciesService.saveCurrency(createCurrency);
 
-            CurrenciesDAO currenciesDAO = new CurrenciesDAO();
-            currenciesDAO.createCurrency(createCurrency);
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            currenciesDAO.closeConnection();
-        } catch (RuntimeException | SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (DataBaseOperationException e){
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }*/
+        } catch (IOException e){
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 }

@@ -4,18 +4,4 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
 							http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
 
-    <servlet>
-        <servlet-name>CurrenciesServlet</servlet-name>
-        <servlet-class>com.github.mukhlisov.servlets.CurrenciesServlet</servlet-class>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>CurrenciesServlet</servlet-name>
-        <url-pattern>/currencies/*</url-pattern>
-    </servlet-mapping>
-
-
-    <listener>
-        <listener-class>com.github.mukhlisov.init.DataBaseInitializer</listener-class>
-    </listener>
 </web-app>

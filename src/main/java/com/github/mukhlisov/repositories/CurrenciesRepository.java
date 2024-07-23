@@ -64,6 +64,9 @@ public class CurrenciesRepository extends SQLiteRepository<Integer, Currency> {
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
         preparedStatement.setString(1, code);
         ResultSet result = preparedStatement.executeQuery();
-        return Optional.of(castToEntity(result));
+        if (result.next()) {
+            return Optional.of(castToEntity(result));
+        }
+        return Optional.empty();
     }
 }

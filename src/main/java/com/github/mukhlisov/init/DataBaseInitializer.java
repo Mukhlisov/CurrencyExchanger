@@ -1,14 +1,15 @@
 package com.github.mukhlisov.init;
 
-import com.github.mukhlisov.utils.CurrencyExchangeConnector;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@WebListener
 public class DataBaseInitializer implements ServletContextListener {
 
     private static final String CREATE_TABLE_CURRENCIES = """
@@ -27,17 +28,17 @@ public class DataBaseInitializer implements ServletContextListener {
             rate REAL NOT NULL);
             """;
 
+    private static final String URL = "jdbc:sqlite:currency_exchange.db";
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
             Class.forName("org.sqlite.JDBC");
-            try (Connection connection = DriverManager.getConnection(CurrencyExchangeConnector.URL);
+            try (Connection connection = DriverManager.getConnection(URL);
                  Statement statement = connection.createStatement()){
-
 
                 statement.execute(CREATE_TABLE_CURRENCIES);
                 statement.execute(CREATE_TABLE_EXCHANGE_RATES);
-
             }
         }catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException("Could not initialize database", e);
