@@ -3,22 +3,25 @@ package com.github.mukhlisov.servlets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mukhlisov.exceptions.CurrencyNotFoundException;
-import com.github.mukhlisov.exceptions.EmptyCurrencyException;
-import com.github.mukhlisov.exceptions.DataBaseOperationException;
-import com.github.mukhlisov.model.dto.CreateCurrencyDto;
+import com.github.mukhlisov.exceptions.*;
+import com.github.mukhlisov.model.dto.currency.CreateCurrencyDto;
+import com.github.mukhlisov.model.dto.currency.UpdateCurrencyDto;
 import com.github.mukhlisov.service.CurrenciesService;
 import com.github.mukhlisov.utils.RequestParser;
+import com.github.mukhlisov.utils.ResponseWriter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @WebServlet(urlPatterns = "/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
+
+    private static final String CURRENCY_WAS_NOT_FOUND = "{\"message\":\"Валюта не найдена\"}";
+    private static final String CURRENCY_WAS_NOT_CREATED = "{\"message\":\"Валюта не была создана\"}";
+    private static final String CURRENCY_WAS_NOT_CHANGED = "{\"message\":\"Валюта не была обновлена\"}";
 
     private final CurrenciesService currenciesService;
     private final ObjectMapper objectMapper;
@@ -29,12 +32,10 @@ public class CurrenciesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp){
-
-        String json = "{\"message\":\"Валюта не найдена\"}";
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response){
         try {
-            String code = RequestParser.getCodeFromRequestUri(req.getRequestURI());
+            String json;
+            String code = RequestParser.getCodeFromRequestUri(request.getRequestURI());
 
             if (code == null){
                 json = objectMapper.writeValueAsString(currenciesService.getAllCurrencies());
@@ -42,37 +43,54 @@ public class CurrenciesServlet extends HttpServlet {
                 json = objectMapper.writeValueAsString(currenciesService.getCurrencyByCode(code));
             }
 
+            ResponseWriter.write(response, json, HttpServletResponse.SC_OK);
         } catch (DataBaseOperationException | JsonProcessingException e){
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (EmptyCurrencyException e){
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (CurrencyNotFoundException e){
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } finally {
-            try (PrintWriter writer = resp.getWriter()){
-                resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
-                writer.print(json);
-            } catch (IOException e){
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_FOUND, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (EmptyURIVariableException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_FOUND, HttpServletResponse.SC_BAD_REQUEST);
+        } catch (CurrencyNotFoundException e) {
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_FOUND, HttpServletResponse.SC_NOT_FOUND);
         }
-
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try{
-            String json = RequestParser.getJSONData(req.getInputStream());
+            String json = RequestParser.getJSONData(request.getInputStream());
 
             CreateCurrencyDto createCurrencyDto = objectMapper.readValue(json, CreateCurrencyDto.class);
             currenciesService.saveCurrency(createCurrencyDto);
 
-            resp.setStatus(HttpServletResponse.SC_CREATED);
+            ResponseWriter.write(response,
+                    objectMapper.writeValueAsString(
+                            currenciesService.getCurrencyByCode(createCurrencyDto.getCode())
+                    ),
+                    HttpServletResponse.SC_CREATED);
+
         } catch (DataBaseOperationException | IOException e){
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CREATED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (EntityInsertException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CREATED, HttpServletResponse.SC_CONFLICT);
+        } catch (IncorrectParametersException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CREATED, HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response){
+        try{
+            String json = RequestParser.getJSONData(request.getInputStream());
 
+            UpdateCurrencyDto updateCurrencyDto = objectMapper.readValue(json, UpdateCurrencyDto.class);
+            currenciesService.updateCurrency(updateCurrencyDto);
+
+            ResponseWriter.write(response, json, HttpServletResponse.SC_OK);
+        } catch (DataBaseOperationException | IOException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CHANGED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (EntityInsertException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CHANGED, HttpServletResponse.SC_CONFLICT);
+        } catch (IncorrectParametersException e){
+            ResponseWriter.write(response, CURRENCY_WAS_NOT_CHANGED, HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
 }

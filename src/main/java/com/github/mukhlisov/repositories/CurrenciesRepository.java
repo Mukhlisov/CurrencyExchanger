@@ -1,5 +1,6 @@
 package com.github.mukhlisov.repositories;
 
+import com.github.mukhlisov.exceptions.IncorrectParametersException;
 import com.github.mukhlisov.model.Currency;
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
 

@@ -1,6 +1,6 @@
 package com.github.mukhlisov.utils;
 
-import com.github.mukhlisov.exceptions.EmptyCurrencyException;
+import com.github.mukhlisov.exceptions.EmptyURIVariableException;
 import jakarta.servlet.ServletInputStream;
 
 import java.io.BufferedReader;
@@ -10,13 +10,13 @@ import java.nio.charset.StandardCharsets;
 
 public class RequestParser {
 
-    public static String getCodeFromRequestUri(String uri) throws EmptyCurrencyException {
+    public static String getCodeFromRequestUri(String uri) throws EmptyURIVariableException {
         String code = null;
         int index = uri.lastIndexOf("/");
         if (index != 0){
             code = uri.substring(index + 1);
             if (code.isEmpty()){
-                throw new EmptyCurrencyException("There is no currency name in the request URI");
+                throw new EmptyURIVariableException("There is no currency name in the request URI");
             }
         }
         return code;
