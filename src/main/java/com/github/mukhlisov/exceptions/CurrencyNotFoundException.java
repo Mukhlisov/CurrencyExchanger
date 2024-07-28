@@ -1,6 +1,8 @@
 package com.github.mukhlisov.exceptions;
 
-public class CurrencyNotFoundException extends RuntimeException {
+import java.util.NoSuchElementException;
+
+public class CurrencyNotFoundException extends NoSuchElementException {
     public CurrencyNotFoundException(final String message) {
         super(message);
     }
