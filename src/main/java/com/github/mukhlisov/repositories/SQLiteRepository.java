@@ -82,41 +82,72 @@ public abstract class SQLiteRepository<K, E> implements AutoCloseable {
 
     /**
      * Override cast method as in this example
+     * <p>
      * {@code return new E(result.getString(stringName), result.getString(anotherStringName), etc...);}
+     * </p>
      */
     protected abstract E castToEntity(ResultSet result) throws SQLException;
 
     /**
-     * Override method as in this example {@code return "(?, ?, ...)";}
-     * Place ? in brackets as many times as the number of fields in ur Entity
+     * Override method as in this example
+     * <p>
+     * {@code return "(?, ?, ...)";}
+     * </p>
+     * Place ? in brackets as many times as the number of fields in your Entity
      * except the id.
      */
     protected abstract String getPlaceHolders();
 
     /**
-     * Override it in this way {@code return "(field_name1, field_name2, ...)";}
-     * Put all fields except the id field.
-     * Field names must be same as field in database table
+     * Override it in this way
+     * <p>
+     * {@code return "(field_name1, field_name2, ...)";}
+     * </p>
+     * Put all fields except the id field. Field names must be same as field in database table.
     */
     protected abstract String getColumns();
 
     /**
      * Override this method so that it returns a string of the form
+     * <p>
      * {@code return "field_name1 = ?, field_name2 = ?, ...";}
+     * </p>
+     * (still excepting the id field)
     * */
     protected abstract String getUpdateColumns();
 
     /**
-     * Override get method to get Entity id {@code return entity.getId();}
+     * Override get method to get Entity id
+     * <p>
+     * {@code return entity.getId();}
+     * </p>
      */
     protected abstract String getEntityId(E entity);
 
     /**
      * This method should fill prepared statement with entity fields values except entity id.
+     * <p>
+     * {@code
+     * preparedStatement.setString(1, entity.getField1());
+     *
+     * preparedStatement.setString(2, entity.getField2());
+     *
+     * preparedStatement.setString(3, entity.getField3();}
+     * </p>
     * */
     protected abstract void setInsertValues(PreparedStatement preparedStatement, E entity) throws SQLException;
     /**
      * This method should fill prepared statement with entity fields values.
+     * <p>
+     * {@code
+     * preparedStatement.setString(1, entity.getField1());
+     *
+     * preparedStatement.setString(2, entity.getField2());
+     *
+     * preparedStatement.setString(..., ...);
+     *
+     * preparedStatement.setString(lastIndex, entity.getId();}
+     * </p>
      * */
     protected abstract void setUpdateValues(PreparedStatement preparedStatement, E entity) throws SQLException;
 }
