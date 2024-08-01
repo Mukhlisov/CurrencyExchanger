@@ -42,7 +42,6 @@ public class DataBaseInitializer implements ServletContextListener {
                  Statement statement = connection.createStatement()){
 
                 statement.execute(CREATE_TABLE_CURRENCIES);
-                statement.execute("DROP TABLE IF EXISTS exchange_rates");
                 statement.execute(CREATE_TABLE_EXCHANGE_RATES);
             }
         }catch (ClassNotFoundException | SQLException e) {
