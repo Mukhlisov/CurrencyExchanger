@@ -1,7 +1,7 @@
-package com.github.mukhlisov.model.dto.exchangeRate;
+package com.github.mukhlisov.models.dto.exchangeRate;
 
 
-import com.github.mukhlisov.model.Currency;
+import com.github.mukhlisov.models.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

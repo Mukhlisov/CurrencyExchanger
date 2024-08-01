@@ -1,14 +1,14 @@
-package com.github.mukhlisov.service;
+package com.github.mukhlisov.services;
 
 import com.github.mukhlisov.exceptions.CurrencyNotFoundException;
 import com.github.mukhlisov.exceptions.DataBaseOperationException;
 import com.github.mukhlisov.exceptions.EntityInsertException;
 import com.github.mukhlisov.exceptions.RateNotFoundException;
-import com.github.mukhlisov.model.Currency;
-import com.github.mukhlisov.model.ExchangeCode;
-import com.github.mukhlisov.model.dto.exchangeRate.CreateExchangeRateDto;
-import com.github.mukhlisov.model.dto.exchangeRate.ExchangeRateOutputDto;
-import com.github.mukhlisov.model.ExchangeRate;
+import com.github.mukhlisov.models.Currency;
+import com.github.mukhlisov.models.ExchangeCode;
+import com.github.mukhlisov.models.dto.exchangeRate.CreateExchangeRateDto;
+import com.github.mukhlisov.models.dto.exchangeRate.ExchangeRateOutputDto;
+import com.github.mukhlisov.models.ExchangeRate;
 import com.github.mukhlisov.repositories.ExchangeRatesRepository;
 
 import java.sql.SQLException;

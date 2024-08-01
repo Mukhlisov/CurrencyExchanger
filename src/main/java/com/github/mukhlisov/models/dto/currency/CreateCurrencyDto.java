@@ -1,4 +1,4 @@
-package com.github.mukhlisov.model.dto.currency;
+package com.github.mukhlisov.models.dto.currency;
 
 
 import lombok.AllArgsConstructor;

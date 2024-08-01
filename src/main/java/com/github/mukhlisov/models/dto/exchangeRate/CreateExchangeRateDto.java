@@ -1,4 +1,4 @@
-package com.github.mukhlisov.model.dto.exchangeRate;
+package com.github.mukhlisov.models.dto.exchangeRate;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.github.mukhlisov.model;
+package com.github.mukhlisov.models;
 
 
 import lombok.Getter;

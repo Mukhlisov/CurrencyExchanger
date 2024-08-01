@@ -1,9 +1,9 @@
-package com.github.mukhlisov.service;
+package com.github.mukhlisov.services;
 
 import com.github.mukhlisov.exceptions.*;
-import com.github.mukhlisov.model.dto.currency.CreateCurrencyDto;
-import com.github.mukhlisov.model.Currency;
-import com.github.mukhlisov.model.dto.currency.UpdateCurrencyDto;
+import com.github.mukhlisov.models.dto.currency.CreateCurrencyDto;
+import com.github.mukhlisov.models.Currency;
+import com.github.mukhlisov.models.dto.currency.UpdateCurrencyDto;
 import com.github.mukhlisov.repositories.CurrenciesRepository;
 
 import java.sql.SQLException;

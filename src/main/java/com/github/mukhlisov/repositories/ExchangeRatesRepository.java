@@ -1,7 +1,7 @@
 package com.github.mukhlisov.repositories;
 
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
-import com.github.mukhlisov.model.ExchangeRate;
+import com.github.mukhlisov.models.ExchangeRate;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

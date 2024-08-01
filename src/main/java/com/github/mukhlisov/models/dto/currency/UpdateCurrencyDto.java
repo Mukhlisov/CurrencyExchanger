@@ -1,7 +1,6 @@
-package com.github.mukhlisov.model.dto.currency;
+package com.github.mukhlisov.models.dto.currency;
 
 
-import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
