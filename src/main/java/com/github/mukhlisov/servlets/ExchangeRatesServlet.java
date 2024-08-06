@@ -3,12 +3,14 @@ package com.github.mukhlisov.servlets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mukhlisov.exceptions.*;
-import com.github.mukhlisov.models.ExchangeCode;
+import com.github.mukhlisov.models.dto.ExchangeCode;
 import com.github.mukhlisov.models.dto.exchangeRate.CreateExchangeRateDto;
+import com.github.mukhlisov.models.dto.exchangeRate.ExchangeRateOutputDto;
+import com.github.mukhlisov.models.dto.exchangeRate.UpdateExchangeRateDto;
 import com.github.mukhlisov.services.ExchangeRateService;
+import com.github.mukhlisov.services.interfaces.IExchangeRateService;
 import com.github.mukhlisov.utils.RequestParser;
 import com.github.mukhlisov.utils.ResponseWriter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,9 +23,9 @@ public class ExchangeRatesServlet extends HttpServlet {
 
     private static final String EXCHANGE_RATE_WAS_NOT_FOUND = "{\"message\":\"Курс обмена не найден\"}";
     private static final String EXCHANGE_RATE_WAS_NOT_CREATED = "{\"message\":\"Курс обмена не был создан\"}";
-    private static final String EXCHANGE_CURRENCY_WAS_NOT_CHANGED = "{\"message\":\"Курс обмена не был обновлен\"}";
+    private static final String EXCHANGE_RATE_WAS_NOT_CHANGED = "{\"message\":\"Курс обмена не был обновлен\"}";
 
-    private final ExchangeRateService exchangeRateService;
+    private final IExchangeRateService exchangeRateService;
     private final ObjectMapper objectMapper;
 
     public ExchangeRatesServlet() {
@@ -47,7 +49,7 @@ public class ExchangeRatesServlet extends HttpServlet {
             ResponseWriter.write(response, json, HttpServletResponse.SC_OK);
         } catch (EmptyURIVariableException | IncorrectParametersException e){
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_FOUND, HttpServletResponse.SC_BAD_REQUEST);
-        } catch (RateNotFoundException e){
+        } catch (CurrencyNotFoundException | RateNotFoundException e){
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_FOUND, HttpServletResponse.SC_NOT_FOUND);
         } catch (DataBaseOperationException | JsonProcessingException e) {
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_FOUND, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -60,21 +62,16 @@ public class ExchangeRatesServlet extends HttpServlet {
             String json = RequestParser.getJSONData(request.getInputStream());
 
             CreateExchangeRateDto createExchangeRateDto = objectMapper.readValue(json, CreateExchangeRateDto.class);
-            exchangeRateService.saveExchangeRate(createExchangeRateDto);
+            ExchangeRateOutputDto exchangeRateOutputDto = exchangeRateService.saveExchangeRate(createExchangeRateDto);
 
-            ExchangeCode exchangeCode = new ExchangeCode(
-                    createExchangeRateDto.getBaseCurrencyCode(),
-                    createExchangeRateDto.getTargetCurrencyCode()
-            );
-            //TODO: RETURN CREATED ENTITY FROM INSERT METHOD
             ResponseWriter.write(
                     response,
-                    objectMapper.writeValueAsString(exchangeRateService.getExchangeRate(exchangeCode)),
+                    objectMapper.writeValueAsString(exchangeRateOutputDto),
                     HttpServletResponse.SC_CREATED
             );
         } catch (DataBaseOperationException | IOException e){
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CREATED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (CurrencyNotFoundException e){
+        } catch (CurrencyNotFoundException | RateNotFoundException e){
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CREATED, HttpServletResponse.SC_NOT_FOUND);
         } catch (EntityInsertException e){
             ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CREATED, HttpServletResponse.SC_CONFLICT);
@@ -84,7 +81,27 @@ public class ExchangeRatesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        super.doPut(request, response);
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
+
+        try{
+            String json = RequestParser.getJSONData(request.getInputStream());
+            ExchangeCode exchangeCode = new ExchangeCode(RequestParser.getCodeFromRequestUri(request.getRequestURI()));
+
+            UpdateExchangeRateDto updateExchangeRateDto = objectMapper.readValue(json, UpdateExchangeRateDto.class);
+            ExchangeRateOutputDto exchangeRateOutputDto = exchangeRateService.updateExchangeRate(exchangeCode, updateExchangeRateDto);
+
+            ResponseWriter.write(response,
+                    objectMapper.writeValueAsString(exchangeRateOutputDto),
+                    HttpServletResponse.SC_OK
+            );
+        } catch (DataBaseOperationException | IOException e){
+            ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CHANGED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (EntityInsertException e){
+            ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CHANGED, HttpServletResponse.SC_CONFLICT);
+        } catch (CurrencyNotFoundException | RateNotFoundException e){
+            ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CHANGED, HttpServletResponse.SC_NOT_FOUND);
+        } catch (IncorrectParametersException e){
+            ResponseWriter.write(response, EXCHANGE_RATE_WAS_NOT_CHANGED, HttpServletResponse.SC_BAD_REQUEST);
+        }
     }
 }
