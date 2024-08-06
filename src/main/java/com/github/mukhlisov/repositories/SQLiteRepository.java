@@ -1,6 +1,7 @@
 package com.github.mukhlisov.repositories;
 
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
+import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,6 +37,7 @@ public abstract class SQLiteRepository<K, E> implements AutoCloseable {
             while(result.next()){
                 list.add(castToEntity(result));
             }
+            DbUtils.closeQuietly(result);
         }
         return list;
     }
@@ -43,13 +45,14 @@ public abstract class SQLiteRepository<K, E> implements AutoCloseable {
     public Optional<E> getById(K id) throws SQLException{
         try (Statement statement = connection.createStatement()){
             String sql = String.format("SELECT * FROM %s WHERE id = %d", table, id);
-
             ResultSet result = statement.executeQuery(sql);
-            return Optional.of(castToEntity(result));
+            Optional<E> entity = Optional.of(castToEntity(result));
+            DbUtils.closeQuietly(result);
+            return entity;
         }
     }
 
-    public void insert(E entity) throws SQLException{
+    public void insert(E entity) throws SQLException {
         String sql = String.format("INSERT INTO %s %s VALUES %s", table, getColumns(), getPlaceHolders());
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         setInsertValues(preparedStatement, entity);
@@ -57,12 +60,13 @@ public abstract class SQLiteRepository<K, E> implements AutoCloseable {
         preparedStatement.close();
     }
 
-    public void update(E entity) throws SQLException{
+    public E update(E entity) throws SQLException{
         String sql = String.format("UPDATE %s SET %s WHERE id = ?", table, getUpdateColumns());
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         setUpdateValues(preparedStatement, entity);
         preparedStatement.executeUpdate();
         preparedStatement.close();
+        return entity;
     }
 
     public void delete(E entity) throws SQLException{

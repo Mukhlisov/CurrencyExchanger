@@ -2,6 +2,7 @@ package com.github.mukhlisov.repositories;
 
 import com.github.mukhlisov.models.Currency;
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
+import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +68,8 @@ public class CurrenciesRepository extends SQLiteRepository<Integer, Currency> {
         if (result.next()) {
             return Optional.of(castToEntity(result));
         }
+        DbUtils.closeQuietly(result);
+        DbUtils.closeQuietly(preparedStatement);
         return Optional.empty();
     }
 }

@@ -2,6 +2,7 @@ package com.github.mukhlisov.repositories;
 
 import com.github.mukhlisov.exceptions.CouldNotConnectDataBaseException;
 import com.github.mukhlisov.models.ExchangeRate;
+import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,10 +67,22 @@ public class ExchangeRatesRepository extends SQLiteRepository<Integer, ExchangeR
         PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
         preparedStatement.setInt(1, baseId);
         preparedStatement.setInt(2, targetId);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        if (resultSet.next()){
-            return Optional.of(castToEntity(resultSet));
+        ResultSet result = preparedStatement.executeQuery();
+        if (result.next()){
+            return Optional.of(castToEntity(result));
         }
+        DbUtils.closeQuietly(result);
+        DbUtils.closeQuietly(preparedStatement);
         return Optional.empty();
+    }
+
+    public void updateByBaseAndTarget(Integer baseId, Integer targetId, double rate) throws SQLException{
+        String sql = String.format("UPDATE %s SET rate = ? WHERE base_currency_id = ? AND target_currency_id = ?", this.table);
+        PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
+        preparedStatement.setDouble(1, rate);
+        preparedStatement.setInt(2, baseId);
+        preparedStatement.setInt(3, targetId);
+        preparedStatement.executeUpdate();
+        DbUtils.closeQuietly(preparedStatement);
     }
 }
