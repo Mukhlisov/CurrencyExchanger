@@ -16,6 +16,8 @@
         <jakarta-servlet.version>6.0.0</jakarta-servlet.version>
         <sqlite-jdbc.version>3.46.0.0</sqlite-jdbc.version>
         <lombol.version>1.18.32</lombol.version>
+        <jackson-databind.version>2.17.1</jackson-databind.version>
+        <dbutils.version>1.8.1</dbutils.version>
     </properties>
 
     <dependencies>
@@ -38,8 +40,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.1</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+            <version>${dbutils.version}</version>
+        </dependency>
+
 
     </dependencies>
 

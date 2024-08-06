@@ -4,9 +4,11 @@ package com.github.mukhlisov.servlets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mukhlisov.exceptions.*;
+import com.github.mukhlisov.models.Currency;
 import com.github.mukhlisov.models.dto.currency.CreateCurrencyDto;
 import com.github.mukhlisov.models.dto.currency.UpdateCurrencyDto;
 import com.github.mukhlisov.services.CurrenciesService;
+import com.github.mukhlisov.services.interfaces.ICurrenciesService;
 import com.github.mukhlisov.utils.RequestParser;
 import com.github.mukhlisov.utils.ResponseWriter;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,7 +25,7 @@ public class CurrenciesServlet extends HttpServlet {
     private static final String CURRENCY_WAS_NOT_CREATED = "{\"message\":\"Валюта не была создана\"}";
     private static final String CURRENCY_WAS_NOT_CHANGED = "{\"message\":\"Валюта не была обновлена\"}";
 
-    private final CurrenciesService currenciesService;
+    private final ICurrenciesService currenciesService;
     private final ObjectMapper objectMapper;
 
     public CurrenciesServlet(){
@@ -59,14 +61,9 @@ public class CurrenciesServlet extends HttpServlet {
             String json = RequestParser.getJSONData(request.getInputStream());
 
             CreateCurrencyDto createCurrencyDto = objectMapper.readValue(json, CreateCurrencyDto.class);
-            currenciesService.saveCurrency(createCurrencyDto);
+            Currency currency = currenciesService.saveCurrency(createCurrencyDto);
 
-            ResponseWriter.write(response,
-                    objectMapper.writeValueAsString(
-                            currenciesService.getCurrencyByCode(createCurrencyDto.getCode())
-                    ),
-                    HttpServletResponse.SC_CREATED);
-
+            ResponseWriter.write(response, objectMapper.writeValueAsString(currency), HttpServletResponse.SC_CREATED);
         } catch (DataBaseOperationException | IOException e){
             ResponseWriter.write(response, CURRENCY_WAS_NOT_CREATED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (EntityInsertException e){
@@ -82,9 +79,9 @@ public class CurrenciesServlet extends HttpServlet {
             String json = RequestParser.getJSONData(request.getInputStream());
 
             UpdateCurrencyDto updateCurrencyDto = objectMapper.readValue(json, UpdateCurrencyDto.class);
-            currenciesService.updateCurrency(updateCurrencyDto);
+            Currency currency = currenciesService.updateCurrency(updateCurrencyDto);
 
-            ResponseWriter.write(response, json, HttpServletResponse.SC_OK);
+            ResponseWriter.write(response, objectMapper.writeValueAsString(currency), HttpServletResponse.SC_OK);
         } catch (DataBaseOperationException | IOException e){
             ResponseWriter.write(response, CURRENCY_WAS_NOT_CHANGED, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (EntityInsertException e){
