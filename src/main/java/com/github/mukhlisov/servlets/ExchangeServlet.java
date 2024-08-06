@@ -33,8 +33,8 @@ public class ExchangeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        ExchangeParameters exchangeParameters = RequestParser.getExchangeParameters(request);
         try{
+            ExchangeParameters exchangeParameters = RequestParser.getExchangeParameters(request);
             ExchangeResult exchangeResult = exchangeService.exchange(exchangeParameters);
 
             ResponseWriter.write(response, objectMapper.writeValueAsString(exchangeResult), HttpServletResponse.SC_OK);

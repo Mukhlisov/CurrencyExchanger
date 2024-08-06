@@ -1,6 +1,7 @@
 package com.github.mukhlisov.utils;
 
 import com.github.mukhlisov.exceptions.EmptyURIVariableException;
+import com.github.mukhlisov.exceptions.IncorrectParametersException;
 import com.github.mukhlisov.models.dto.ExchangeParameters;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class RequestParser {
         return builder.toString();
     }
 
-    public static ExchangeParameters getExchangeParameters(HttpServletRequest request){
+    public static ExchangeParameters getExchangeParameters(HttpServletRequest request) throws IncorrectParametersException {
         return new ExchangeParameters(
                 request.getParameter("from"),
                 request.getParameter("to"),
