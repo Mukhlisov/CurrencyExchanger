@@ -1,4 +1,4 @@
-package com.github.mukhlisov.models;
+package com.github.mukhlisov.models.dto;
 
 
 import com.github.mukhlisov.exceptions.IncorrectParametersException;
@@ -14,14 +14,14 @@ public class ExchangeCode {
     public ExchangeCode(String code) throws IncorrectParametersException {
         try {
             this.baseCode = code.substring(0, 3);
-            this.targetCode = code.substring(2);
+            this.targetCode = code.substring(3);
         } catch (IndexOutOfBoundsException e) {
             throw new IncorrectParametersException("This code is not valid");
         }
     }
 
     public ExchangeCode(String baseCode, String targetCode) throws IncorrectParametersException {
-        if (baseCode.isEmpty() || targetCode.isEmpty()) {
+        if (baseCode.isEmpty() || targetCode.isEmpty() || baseCode.length() != 3 || targetCode.length() != 3) {
             throw new IncorrectParametersException("This code is not valid");
         }
         this.baseCode = baseCode;
