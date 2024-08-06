@@ -1,7 +1,9 @@
 package com.github.mukhlisov.utils;
 
 import com.github.mukhlisov.exceptions.EmptyURIVariableException;
+import com.github.mukhlisov.models.dto.ExchangeParameters;
 import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,5 +35,13 @@ public class RequestParser {
 
         reader.close();
         return builder.toString();
+    }
+
+    public static ExchangeParameters getExchangeParameters(HttpServletRequest request){
+        return new ExchangeParameters(
+                request.getParameter("from"),
+                request.getParameter("to"),
+                Double.parseDouble(request.getParameter("amount"))
+        );
     }
 }
